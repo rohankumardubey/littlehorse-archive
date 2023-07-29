@@ -3,11 +3,19 @@ package io.littlehorse.common.model.command.subcommandresponse;
 import com.google.protobuf.Message;
 import io.littlehorse.common.model.command.AbstractResponse;
 import io.littlehorse.sdk.common.proto.DeleteObjectReplyPb;
+import io.littlehorse.sdk.common.proto.LHResponseCodePb;
 
 public class DeleteObjectReply extends AbstractResponse<DeleteObjectReplyPb> {
 
     public Class<DeleteObjectReplyPb> getProtoBaseClass() {
         return DeleteObjectReplyPb.class;
+    }
+
+    public DeleteObjectReply() {}
+
+    public DeleteObjectReply(LHResponseCodePb code, String message) {
+        this.code = code;
+        this.message = message;
     }
 
     public DeleteObjectReplyPb.Builder toProto() {

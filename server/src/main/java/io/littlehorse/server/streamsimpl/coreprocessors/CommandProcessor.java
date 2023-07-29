@@ -67,7 +67,7 @@ public class CommandProcessor
 
     private void processHelper(final Record<String, Command> commandRecord) {
         Command command = commandRecord.value();
-        dao.setCommand(command);
+        dao.resetAndSetCommand(command);
 
         log.trace(
             "{} Processing command of type {} with commandId {} on partition {}",
@@ -100,7 +100,10 @@ public class CommandProcessor
             if (command.hasResponse() && command.getCommandId() != null) {
                 server.sendErrorToClient(command.getCommandId(), exn);
             }
-            dao.abortChangesAndMarkWfRunFailed(exn.getMessage());
+            dao.abortChangesAndMarkWfRunFailed(
+                exn,
+                command.getPartitionKey() // Note that command id's are wfRunId's too.
+            );
             // Should we have a DLQ? I don't think that makes sense...the internals
             // of a database like Postgres don't have a DLQ for their WAL. However,
             // we should add metrics. If we get here, then A Very Bad Thing has

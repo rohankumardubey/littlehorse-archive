@@ -44,7 +44,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 @Getter
 @Setter
-public abstract class Getable<T extends Message> extends Storeable<T> {
+public abstract class Getable<T extends Message> extends LHSerializable<T> {
 
     public abstract Date getCreatedAt();
 

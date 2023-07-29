@@ -5,9 +5,10 @@ import io.littlehorse.common.proto.GetableClassEnumPb;
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class ObjectId<
-    T extends Message, U extends Message, V extends Storeable<U>
+    T extends Message, U extends Message, V extends Getable<U>
 >
-    extends LHSerializable<T> {
+    extends LHSerializable<T>
+    implements Comparable<ObjectId<?, ?, ?>> {
 
     public abstract String getStoreKey();
 
@@ -33,6 +34,14 @@ public abstract class ObjectId<
     @Override
     public int hashCode() {
         return getStoreKey().hashCode();
+    }
+
+    @Override
+    public int compareTo(ObjectId<?, ?, ?> other) {
+        if (other.getType() != getType()) {
+            return getType().compareTo(getType());
+        }
+        return getStoreKey().compareTo(other.getStoreKey());
     }
 
     public static <

@@ -2,7 +2,9 @@ package io.littlehorse.server.streamsimpl.storeinternals;
 
 import com.google.protobuf.Message;
 import io.littlehorse.common.LHConfig;
+import io.littlehorse.common.model.Getable;
 import io.littlehorse.common.model.LHSerializable;
+import io.littlehorse.common.model.ObjectId;
 import io.littlehorse.common.model.Storeable;
 import io.littlehorse.sdk.common.exception.LHSerdeError;
 import io.littlehorse.server.streamsimpl.storeinternals.index.Tag;
@@ -11,6 +13,7 @@ import io.littlehorse.server.streamsimpl.storeinternals.utils.LHKeyValueStream;
 import io.littlehorse.server.streamsimpl.storeinternals.utils.StoreUtils;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.state.KeyValueIterator;
@@ -33,17 +36,18 @@ import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
  */
 
 @Slf4j
-public class LHROStoreWrapper {
+public class LHROStore {
 
     protected ReadOnlyKeyValueStore<String, Bytes> store;
     protected LHConfig config;
 
-    public LHROStoreWrapper(
-        ReadOnlyKeyValueStore<String, Bytes> store,
-        LHConfig config
-    ) {
+    public LHROStore(ReadOnlyKeyValueStore<String, Bytes> store, LHConfig config) {
         this.store = store;
         this.config = config;
+    }
+
+    public <U extends Message, T extends Getable<U>> T get(ObjectId<?, U, T> id) {
+        throw new NotImplementedException();
     }
 
     public <U extends Message, T extends Storeable<U>> T get(
@@ -105,7 +109,7 @@ public class LHROStoreWrapper {
         return keyValueStream.stream().map(stringTKeyValue -> stringTKeyValue.value);
     }
 
-    public <U extends Message, T extends Storeable<U>> T getLastFromPrefix(
+    public <U extends Message, T extends Getable<U>> T getLastFromPrefix(
         String prefix,
         Class<T> cls
     ) {

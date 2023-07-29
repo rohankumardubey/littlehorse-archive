@@ -10,9 +10,15 @@ import io.littlehorse.common.model.meta.TaskDef;
 import io.littlehorse.common.model.meta.TaskWorkerGroup;
 import io.littlehorse.common.model.meta.WfSpec;
 import io.littlehorse.common.model.meta.usertasks.UserTaskDef;
+import io.littlehorse.common.model.objectId.ExternalEventDefId;
+import io.littlehorse.common.model.objectId.ExternalEventId;
 import io.littlehorse.common.model.objectId.NodeRunId;
+import io.littlehorse.common.model.objectId.TaskDefId;
 import io.littlehorse.common.model.objectId.TaskRunId;
+import io.littlehorse.common.model.objectId.UserTaskDefId;
 import io.littlehorse.common.model.objectId.UserTaskRunId;
+import io.littlehorse.common.model.objectId.WfRunId;
+import io.littlehorse.common.model.objectId.WfSpecId;
 import io.littlehorse.common.model.wfrun.ExternalEvent;
 import io.littlehorse.common.model.wfrun.LHTimer;
 import io.littlehorse.common.model.wfrun.NodeRun;
@@ -39,7 +45,7 @@ import java.util.List;
 public interface LHDAO extends LHGlobalMetaStores {
     public String getCoreCmdTopic();
 
-    public void setCommand(Command command);
+    public void resetAndSetCommand(Command command);
 
     public Command getCommand();
 
@@ -76,6 +82,8 @@ public interface LHDAO extends LHGlobalMetaStores {
 
     public WfRun getWfRun(String id);
 
+    public WfRun getWfRun(WfRunId id);
+
     /*
      * Looks up a WfSpec. If in a partitioned environment (eg. KafkaStreams backend),
      * then the behavior should be:
@@ -101,17 +109,17 @@ public interface LHDAO extends LHGlobalMetaStores {
 
     public void putExternalEventDef(ExternalEventDef eed);
 
-    public DeleteObjectReply deleteWfRun(String wfRunId);
+    public DeleteObjectReply deleteWfRun(WfRunId wfRunId);
 
-    public DeleteObjectReply deleteTaskDef(String name);
+    public DeleteObjectReply deleteTaskDef(TaskDefId id);
 
-    public DeleteObjectReply deleteUserTaskDef(String name, int version);
+    public DeleteObjectReply deleteUserTaskDef(UserTaskDefId id);
 
-    public DeleteObjectReply deleteWfSpec(String name, int version);
+    public DeleteObjectReply deleteWfSpec(WfSpecId id);
 
-    public DeleteObjectReply deleteExternalEventDef(String name);
+    public DeleteObjectReply deleteExternalEventDef(ExternalEventDefId id);
 
-    public DeleteObjectReply deleteExternalEvent(String externalEventId);
+    public DeleteObjectReply deleteExternalEvent(ExternalEventId id);
 
     public TaskRun getTaskRun(TaskRunId taskRunId);
 
@@ -130,7 +138,7 @@ public interface LHDAO extends LHGlobalMetaStores {
      * Clear any dirty cache if necessary, BUT also mark any wfRun's that were
      * in processing as ERROR and note an error message.
      */
-    public void abortChangesAndMarkWfRunFailed(String message);
+    public void abortChangesAndMarkWfRunFailed(Throwable failure, String wfRunId);
 
     /*
      * Commit changes to the backing store.
