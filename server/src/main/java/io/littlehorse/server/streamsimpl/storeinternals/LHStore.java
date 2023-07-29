@@ -1,5 +1,6 @@
 package io.littlehorse.server.streamsimpl.storeinternals;
 
+import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.littlehorse.common.LHConfig;
 import io.littlehorse.common.LHDAO;
@@ -51,6 +52,20 @@ public class LHStore {
             getable.getClass(),
             getable.getStoreKey()
         );
+        throw new NotImplementedException();
+    }
+
+    public void deleteAllByPrefix(String prefix, Class<? extends Getable<?>> cls) {
+        throw new NotImplementedException();
+    }
+
+    public <
+        U extends Message, T extends Getable<U>
+    > T getFirstByCreatedTimeFromPrefix(
+        String prefix,
+        Class<T> cls,
+        Predicate<T> discriminator
+    ) {
         throw new NotImplementedException();
     }
 

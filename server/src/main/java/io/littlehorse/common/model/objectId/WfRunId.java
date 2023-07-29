@@ -6,7 +6,11 @@ import io.littlehorse.common.model.wfrun.WfRun;
 import io.littlehorse.common.proto.GetableClassEnumPb;
 import io.littlehorse.sdk.common.proto.WfRunIdPb;
 import io.littlehorse.sdk.common.proto.WfRunPb;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class WfRunId extends ObjectId<WfRunIdPb, WfRunPb, WfRun> {
 
     public String id;
