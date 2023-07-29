@@ -21,7 +21,7 @@ import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.Repar
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.RepartitionSubCommand;
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.repartitionsubcommand.CreateRemoteTag;
 import io.littlehorse.server.streamsimpl.storeinternals.GetableStorageManager;
-import io.littlehorse.server.streamsimpl.storeinternals.LHStoreWrapper;
+import io.littlehorse.server.streamsimpl.storeinternals.RocksDBWrapper;
 import io.littlehorse.server.streamsimpl.storeinternals.index.Tag;
 import io.littlehorse.server.streamsimpl.storeinternals.index.TagsCache;
 import java.util.List;
@@ -61,14 +61,14 @@ public class GetableStorageManagerTest {
     @Mock
     private LHConfig lhConfig;
 
-    private LHStoreWrapper localStoreWrapper;
+    private RocksDBWrapper localStoreWrapper;
 
     final MockProcessorContext<String, CommandProcessorOutput> mockProcessorContext = new MockProcessorContext<>();
     private GetableStorageManager geTableStorageManager;
 
     @BeforeEach
     void setup() {
-        localStoreWrapper = new LHStoreWrapper(store, lhConfig);
+        localStoreWrapper = new RocksDBWrapper(store, lhConfig);
         geTableStorageManager =
             new GetableStorageManager(
                 localStoreWrapper,

@@ -19,7 +19,7 @@ import org.apache.kafka.streams.processor.api.Record;
 @AllArgsConstructor
 public class TagStorageManager {
 
-    private LHStoreWrapper localStore;
+    private RocksDBWrapper localStore;
     private ProcessorContext<String, CommandProcessorOutput> context;
     private LHConfig lhConfig;
 

@@ -9,7 +9,7 @@ import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.repar
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.repartitionsubcommand.RemoveRemoteTag;
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.repartitionsubcommand.TaskMetricUpdate;
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.repartitionsubcommand.WfMetricUpdate;
-import io.littlehorse.server.streamsimpl.storeinternals.LHStoreWrapper;
+import io.littlehorse.server.streamsimpl.storeinternals.RocksDBWrapper;
 import java.util.Date;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 
@@ -73,7 +73,7 @@ public class RepartitionCommand extends LHSerializable<RepartitionCommandPb> {
         }
     }
 
-    public void process(LHStoreWrapper store, ProcessorContext<Void, Void> ctx) {
+    public void process(RocksDBWrapper store, ProcessorContext<Void, Void> ctx) {
         getSubCommand().process(store, ctx);
     }
 

@@ -8,7 +8,7 @@ import io.littlehorse.server.streamsimpl.ServerTopology;
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.RepartitionCommand;
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.repartitionsubcommand.TaskMetricUpdate;
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.repartitionsubcommand.WfMetricUpdate;
-import io.littlehorse.server.streamsimpl.storeinternals.LHStoreWrapper;
+import io.littlehorse.server.streamsimpl.storeinternals.RocksDBWrapper;
 import io.littlehorse.server.streamsimpl.storeinternals.utils.LHIterKeyValue;
 import io.littlehorse.server.streamsimpl.storeinternals.utils.LHKeyValueIterator;
 import java.time.Duration;
@@ -24,7 +24,7 @@ import org.apache.kafka.streams.processor.api.Record;
 public class RepartitionCommandProcessor
     implements Processor<String, RepartitionCommand, Void, Void> {
 
-    private LHStoreWrapper store;
+    private RocksDBWrapper store;
     private LHConfig config;
     private ProcessorContext<Void, Void> ctx;
 
@@ -35,7 +35,7 @@ public class RepartitionCommandProcessor
     public void init(final ProcessorContext<Void, Void> ctx) {
         this.ctx = ctx;
         store =
-            new LHStoreWrapper(
+            new RocksDBWrapper(
                 ctx.getStateStore(ServerTopology.CORE_REPARTITION_STORE),
                 config
             );

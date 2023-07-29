@@ -31,10 +31,11 @@ public abstract class LHSerializable<T extends Message> {
     }
 
     public byte[] toBytes(LHConfig config) {
-        // TODO: figure out how we're going to get this to work with encryption.
-        // Could just have a global static reference to an encryptor which we use
-        // here and in the fromBytes() thing.
         return toProto().build().toByteArray();
+    }
+
+    public byte[] toBytes() {
+        return toBytes(null);
     }
 
     public static <U extends Message, T extends LHSerializable<U>> T fromProto(
@@ -74,6 +75,11 @@ public abstract class LHSerializable<T extends Message> {
                 "unable to process bytes for " + cls.getName()
             );
         }
+    }
+
+    public static <T extends LHSerializable<?>> T fromBytes(byte[] b, Class<T> cls)
+        throws LHSerdeError {
+        return fromBytes(b, cls, null);
     }
 
     private static <T extends LHSerializable<?>> T load(

@@ -48,9 +48,9 @@ import io.littlehorse.server.streamsimpl.ServerTopology;
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.RepartitionCommand;
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.repartitionsubcommand.TaskMetricUpdate;
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.repartitionsubcommand.WfMetricUpdate;
-import io.littlehorse.server.streamsimpl.storeinternals.LHROStore;
-import io.littlehorse.server.streamsimpl.storeinternals.LHStore;
-import io.littlehorse.server.streamsimpl.storeinternals.LHStoreWrapper;
+import io.littlehorse.server.streamsimpl.storeinternals.GetableStorageManager;
+import io.littlehorse.server.streamsimpl.storeinternals.ReadOnlyRocksDBWrapper;
+import io.littlehorse.server.streamsimpl.storeinternals.RocksDBWrapper;
 import io.littlehorse.server.streamsimpl.storeinternals.utils.LHIterKeyValue;
 import io.littlehorse.server.streamsimpl.storeinternals.utils.LHKeyValueIterator;
 import io.littlehorse.server.streamsimpl.util.InternalHosts;
@@ -81,7 +81,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
     private Map<String, WfMetricUpdate> wfMetricPuts;
     private Set<Host> currentHosts;
 
-    private LHStore lhStore;
+    private GetableStorageManager storageManager;
     private KeyValueStore<String, Bytes> rawLocalStore;
 
     /*
@@ -108,8 +108,8 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
      */
     private boolean isHotMetadataPartition;
 
-    private LHStoreWrapper localStore;
-    private LHROStore globalStore;
+    private RocksDBWrapper localStore;
+    private ReadOnlyRocksDBWrapper globalStore;
     private ProcessorContext<String, CommandProcessorOutput> ctx;
     private LHConfig config;
     private final WfSpecCache wfSpecCache;
@@ -142,8 +142,8 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
         ReadOnlyKeyValueStore<String, Bytes> rawGlobalStore = ctx.getStateStore(
             ServerTopology.GLOBAL_STORE
         );
-        localStore = new LHStoreWrapper(rawLocalStore, config);
-        globalStore = new LHROStore(rawGlobalStore, config);
+        localStore = new RocksDBWrapper(rawLocalStore, config);
+        globalStore = new ReadOnlyRocksDBWrapper(rawGlobalStore, config);
 
         scheduledTaskPuts = new HashMap<>();
         timersToSchedule = new ArrayList<>();
@@ -151,38 +151,39 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
 
     @Override
     public void putNodeRun(NodeRun nr) {
-        lhStore.put(nr);
+        storageManager.put(nr);
     }
 
     @Override
     public NodeRun getNodeRun(String wfRunId, int threadNum, int position) {
-        return lhStore.get(new NodeRunId(wfRunId, threadNum, position));
+        return storageManager.get(new NodeRunId(wfRunId, threadNum, position));
     }
 
     @Override
     public void putTaskRun(TaskRun tr) {
-        lhStore.put(tr);
+        storageManager.put(tr);
     }
 
     @Override
     public TaskRun getTaskRun(TaskRunId taskRunId) {
-        return lhStore.get(taskRunId);
+        return storageManager.get(taskRunId);
     }
 
     @Override
     public void putUserTaskRun(UserTaskRun utr) {
-        lhStore.put(utr);
+        storageManager.put(utr);
     }
 
     @Override
     public UserTaskRun getUserTaskRun(UserTaskRunId userTaskRunId) {
-        return lhStore.get(userTaskRunId);
+        return storageManager.get(userTaskRunId);
     }
 
     @Override
     public void resetAndSetCommand(Command command) {
         this.command = command;
-        this.lhStore = new LHStore(rawLocalStore, ctx, config, command, this);
+        this.storageManager =
+            new GetableStorageManager(rawLocalStore, ctx, config, command, this);
     }
 
     @Override
@@ -198,7 +199,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
             );
         }
         // TODO: note we are putting a Global Metadata
-        lhStore.put(spec);
+        storageManager.put(spec);
     }
 
     @Override
@@ -209,7 +210,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
             );
         }
         // TODO: note we are putting a Global Metadata
-        lhStore.put(spec);
+        storageManager.put(spec);
     }
 
     @Override
@@ -220,13 +221,13 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
             );
         }
         // TODO: note we are putting Global Metadata
-        lhStore.put(spec);
+        storageManager.put(spec);
     }
 
     @Override
     public WfSpec getWfSpec(String name, Integer version) {
         Supplier<WfSpec> findWfSpec = () -> {
-            LHROStore store = globalStore;
+            ReadOnlyRocksDBWrapper store = globalStore;
             if (version != null) {
                 return store.get(new WfSpecId(name, version));
             }
@@ -239,7 +240,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
 
     @Override
     public UserTaskDef getUserTaskDef(String name, Integer version) {
-        LHROStore store = globalStore;
+        ReadOnlyRocksDBWrapper store = globalStore;
         UserTaskDef out;
         if (version != null) {
             // First check the most recent puts
@@ -259,12 +260,12 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
             );
         }
         // TODO: global metadata storage change
-        lhStore.put(spec);
+        storageManager.put(spec);
     }
 
     @Override
     public TaskDef getTaskDef(String name) {
-        LHROStore store = globalStore;
+        ReadOnlyRocksDBWrapper store = globalStore;
         return store.get(new TaskDefId(name));
     }
 
@@ -279,12 +280,12 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
 
     @Override
     public TaskWorkerGroup getTaskWorkerGroup(String taskDefName) {
-        return lhStore.get(new TaskWorkerGroupId(taskDefName));
+        return storageManager.get(new TaskWorkerGroupId(taskDefName));
     }
 
     @Override
     public void putTaskWorkerGroup(TaskWorkerGroup taskWorkerGroup) {
-        lhStore.put(taskWorkerGroup);
+        storageManager.put(taskWorkerGroup);
     }
 
     @Override
@@ -294,12 +295,12 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
 
     @Override
     public void putVariable(Variable var) {
-        lhStore.put(var);
+        storageManager.put(var);
     }
 
     @Override
     public Variable getVariable(String wfRunId, String name, int threadNum) {
-        return lhStore.get(new VariableId(wfRunId, threadNum, name));
+        return storageManager.get(new VariableId(wfRunId, threadNum, name));
     }
 
     // This for later
@@ -308,7 +309,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
         String wfRunId,
         String externalEventDefName
     ) {
-        return lhStore.getFirstByCreatedTimeFromPrefix(
+        return storageManager.getFirstByCreatedTimeFromPrefix(
             externalEventDefName,
             ExternalEvent.class,
             extEvt -> !extEvt.isClaimed()
@@ -321,12 +322,12 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
             externalEventId,
             ExternalEventId.class
         );
-        return lhStore.get(id);
+        return storageManager.get(id);
     }
 
     @Override
     public void saveExternalEvent(ExternalEvent evt) {
-        lhStore.put(evt);
+        storageManager.put(evt);
     }
 
     @Override
@@ -360,17 +361,17 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
 
     @Override
     public WfRun getWfRun(WfRunId id) {
-        return lhStore.get(id);
+        return storageManager.get(id);
     }
 
     @Override
     public void saveWfRun(WfRun wfRun) {
-        lhStore.put(wfRun);
+        storageManager.put(wfRun);
     }
 
     @Override
     public void commitChanges() {
-        lhStore.flush();
+        storageManager.flush();
 
         timersToSchedule.forEach(this::forwardTimer);
         timersToSchedule.clear();
@@ -388,7 +389,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
     public void abortChangesAndMarkWfRunFailed(Throwable failure, String wfRunId) {
         // if the wfRun exists: we want to mark it as failed with a message.
         // Else, do nothing.
-        WfRun wfRun = lhStore.get(new WfRunId(wfRunId));
+        WfRun wfRun = storageManager.get(new WfRunId(wfRunId));
         if (wfRun != null) {
             log.warn(
                 "Marking wfRun {} as failed due to internal LH exception",
@@ -431,11 +432,11 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
             );
         }
         // Delete all wfRun children.
-        lhStore.deleteAllByPrefix(wfRunId.getId(), NodeRun.class);
-        lhStore.deleteAllByPrefix(wfRunId.getId(), TaskRun.class);
-        lhStore.deleteAllByPrefix(wfRunId.getId(), ExternalEvent.class);
-        lhStore.deleteAllByPrefix(wfRunId.getId(), Variable.class);
-        lhStore.deleteAllByPrefix(wfRunId.getId(), UserTaskRun.class);
+        storageManager.deleteAllByPrefix(wfRunId.getId(), NodeRun.class);
+        storageManager.deleteAllByPrefix(wfRunId.getId(), TaskRun.class);
+        storageManager.deleteAllByPrefix(wfRunId.getId(), ExternalEvent.class);
+        storageManager.deleteAllByPrefix(wfRunId.getId(), Variable.class);
+        storageManager.deleteAllByPrefix(wfRunId.getId(), UserTaskRun.class);
 
         return deleteObject(wfRunId);
     }
@@ -448,7 +449,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
     private <
         T extends Message, U extends Message, V extends Getable<U>
     > DeleteObjectReply deleteObject(ObjectId<T, U, V> id) {
-        V toDelete = lhStore.get(id);
+        V toDelete = storageManager.get(id);
 
         if (toDelete == null) {
             return new DeleteObjectReply(
@@ -456,7 +457,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
                 "Couldn't find object with provided ID."
             );
         }
-        lhStore.delete(id);
+        storageManager.delete(id);
         return new DeleteObjectReply(LHResponseCodePb.OK, null);
     }
 
@@ -477,7 +478,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
 
     @Override
     public DeleteObjectReply deleteExternalEvent(ExternalEventId id) {
-        ExternalEvent evt = lhStore.get(id);
+        ExternalEvent evt = storageManager.get(id);
         if (evt.isClaimed()) {}
         return deleteObject(id);
     }

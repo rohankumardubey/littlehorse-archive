@@ -4,29 +4,61 @@
 package io.littlehorse.common.proto;
 
 /**
- * Protobuf enum {@code littlehorse.TagStorageTypePb}
+ * Protobuf enum {@code littlehorse.StoreableClassEnumPb}
  */
-public enum TagStorageTypePb
+public enum StoreableClassEnumPb
     implements com.google.protobuf.ProtocolMessageEnum {
   /**
-   * <code>LOCAL = 0;</code>
+   * <code>STORED_GETABLE = 0;</code>
    */
-  LOCAL(0),
+  STORED_GETABLE(0),
   /**
-   * <code>REMOTE = 1;</code>
+   * <code>SCHEDULED_TASK = 1;</code>
    */
-  REMOTE(1),
+  SCHEDULED_TASK(1),
+  /**
+   * <code>WF_METRIC_UPDATE = 2;</code>
+   */
+  WF_METRIC_UPDATE(2),
+  /**
+   * <code>TASK_METRIC_UPDATE = 3;</code>
+   */
+  TASK_METRIC_UPDATE(3),
+  /**
+   * <code>LH_TIMER = 4;</code>
+   */
+  LH_TIMER(4),
+  /**
+   * <code>TAG = 5;</code>
+   */
+  TAG(5),
   UNRECOGNIZED(-1),
   ;
 
   /**
-   * <code>LOCAL = 0;</code>
+   * <code>STORED_GETABLE = 0;</code>
    */
-  public static final int LOCAL_VALUE = 0;
+  public static final int STORED_GETABLE_VALUE = 0;
   /**
-   * <code>REMOTE = 1;</code>
+   * <code>SCHEDULED_TASK = 1;</code>
    */
-  public static final int REMOTE_VALUE = 1;
+  public static final int SCHEDULED_TASK_VALUE = 1;
+  /**
+   * <code>WF_METRIC_UPDATE = 2;</code>
+   */
+  public static final int WF_METRIC_UPDATE_VALUE = 2;
+  /**
+   * <code>TASK_METRIC_UPDATE = 3;</code>
+   */
+  public static final int TASK_METRIC_UPDATE_VALUE = 3;
+  /**
+   * <code>LH_TIMER = 4;</code>
+   */
+  public static final int LH_TIMER_VALUE = 4;
+  /**
+   * <code>TAG = 5;</code>
+   */
+  public static final int TAG_VALUE = 5;
 
 
   public final int getNumber() {
@@ -43,7 +75,7 @@ public enum TagStorageTypePb
    * @deprecated Use {@link #forNumber(int)} instead.
    */
   @java.lang.Deprecated
-  public static TagStorageTypePb valueOf(int value) {
+  public static StoreableClassEnumPb valueOf(int value) {
     return forNumber(value);
   }
 
@@ -51,23 +83,27 @@ public enum TagStorageTypePb
    * @param value The numeric wire value of the corresponding enum entry.
    * @return The enum associated with the given numeric wire value.
    */
-  public static TagStorageTypePb forNumber(int value) {
+  public static StoreableClassEnumPb forNumber(int value) {
     switch (value) {
-      case 0: return LOCAL;
-      case 1: return REMOTE;
+      case 0: return STORED_GETABLE;
+      case 1: return SCHEDULED_TASK;
+      case 2: return WF_METRIC_UPDATE;
+      case 3: return TASK_METRIC_UPDATE;
+      case 4: return LH_TIMER;
+      case 5: return TAG;
       default: return null;
     }
   }
 
-  public static com.google.protobuf.Internal.EnumLiteMap<TagStorageTypePb>
+  public static com.google.protobuf.Internal.EnumLiteMap<StoreableClassEnumPb>
       internalGetValueMap() {
     return internalValueMap;
   }
   private static final com.google.protobuf.Internal.EnumLiteMap<
-      TagStorageTypePb> internalValueMap =
-        new com.google.protobuf.Internal.EnumLiteMap<TagStorageTypePb>() {
-          public TagStorageTypePb findValueByNumber(int number) {
-            return TagStorageTypePb.forNumber(number);
+      StoreableClassEnumPb> internalValueMap =
+        new com.google.protobuf.Internal.EnumLiteMap<StoreableClassEnumPb>() {
+          public StoreableClassEnumPb findValueByNumber(int number) {
+            return StoreableClassEnumPb.forNumber(number);
           }
         };
 
@@ -85,12 +121,12 @@ public enum TagStorageTypePb
   }
   public static final com.google.protobuf.Descriptors.EnumDescriptor
       getDescriptor() {
-    return io.littlehorse.common.proto.InternalServer.getDescriptor().getEnumTypes().get(4);
+    return io.littlehorse.common.proto.InternalServer.getDescriptor().getEnumTypes().get(3);
   }
 
-  private static final TagStorageTypePb[] VALUES = values();
+  private static final StoreableClassEnumPb[] VALUES = values();
 
-  public static TagStorageTypePb valueOf(
+  public static StoreableClassEnumPb valueOf(
       com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
     if (desc.getType() != getDescriptor()) {
       throw new java.lang.IllegalArgumentException(
@@ -104,10 +140,10 @@ public enum TagStorageTypePb
 
   private final int value;
 
-  private TagStorageTypePb(int value) {
+  private StoreableClassEnumPb(int value) {
     this.value = value;
   }
 
-  // @@protoc_insertion_point(enum_scope:littlehorse.TagStorageTypePb)
+  // @@protoc_insertion_point(enum_scope:littlehorse.StoreableClassEnumPb)
 }
 

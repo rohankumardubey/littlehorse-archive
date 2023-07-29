@@ -415,25 +415,28 @@ public final class InternalServer {
       "\005\022\022\n\016EXTERNAL_EVENT\020\006\022\024\n\020TASK_DEF_METRIC" +
       "S\020\007\022\023\n\017WF_SPEC_METRICS\020\010\022\025\n\021TASK_WORKER_" +
       "GROUP\020\t\022\021\n\rUSER_TASK_DEF\020\n\022\014\n\010TASK_RUN\020\013" +
-      "\022\021\n\rUSER_TASK_RUN\020\014*)\n\020TagStorageTypePb\022" +
-      "\t\n\005LOCAL\020\000\022\n\n\006REMOTE\020\001*,\n\016ServerStatusPb" +
-      "\022\013\n\007HOST_UP\020\000\022\r\n\tHOST_DOWN\020\0012\300\004\n\013LHInter" +
-      "nals\022^\n\021CentralStoreQuery\022 .littlehorse." +
-      "CentralStoreQueryPb\032%.littlehorse.Centra" +
-      "lStoreQueryReplyPb\"\000\022O\n\014InternalScan\022\033.l" +
-      "ittlehorse.InternalScanPb\032 .littlehorse." +
-      "InternalScanReplyPb\"\000\022U\n\016waitForCommand\022" +
-      "\035.littlehorse.WaitForCommandPb\032\".littleh" +
-      "orse.WaitForCommandReplyPb\"\000\022q\n\022GetAdver" +
-      "tisedHosts\022).littlehorse.InternalGetAdve" +
-      "rtisedHostsPb\032..littlehorse.InternalGetA" +
-      "dvertisedHostsReplyPb\"\000\022k\n\026TopologyInsta" +
-      "ncesState\022$.littlehorse.TopologyInstance" +
-      "StatePb\032).littlehorse.TopologyInstanceSt" +
-      "ateReplyPb\"\000\022I\n\nLocalTasks\022\031.littlehorse" +
-      ".LocalTasksPb\032\036.littlehorse.LocalTasksRe" +
-      "plyPb\"\000B\037\n\033io.littlehorse.common.protoP\001" +
-      "b\006proto3"
+      "\022\021\n\rUSER_TASK_RUN\020\014*\203\001\n\024StoreableClassEn" +
+      "umPb\022\022\n\016STORED_GETABLE\020\000\022\022\n\016SCHEDULED_TA" +
+      "SK\020\001\022\024\n\020WF_METRIC_UPDATE\020\002\022\026\n\022TASK_METRI" +
+      "C_UPDATE\020\003\022\014\n\010LH_TIMER\020\004\022\007\n\003TAG\020\005*)\n\020Tag" +
+      "StorageTypePb\022\t\n\005LOCAL\020\000\022\n\n\006REMOTE\020\001*,\n\016" +
+      "ServerStatusPb\022\013\n\007HOST_UP\020\000\022\r\n\tHOST_DOWN" +
+      "\020\0012\300\004\n\013LHInternals\022^\n\021CentralStoreQuery\022" +
+      " .littlehorse.CentralStoreQueryPb\032%.litt" +
+      "lehorse.CentralStoreQueryReplyPb\"\000\022O\n\014In" +
+      "ternalScan\022\033.littlehorse.InternalScanPb\032" +
+      " .littlehorse.InternalScanReplyPb\"\000\022U\n\016w" +
+      "aitForCommand\022\035.littlehorse.WaitForComma" +
+      "ndPb\032\".littlehorse.WaitForCommandReplyPb" +
+      "\"\000\022q\n\022GetAdvertisedHosts\022).littlehorse.I" +
+      "nternalGetAdvertisedHostsPb\032..littlehors" +
+      "e.InternalGetAdvertisedHostsReplyPb\"\000\022k\n" +
+      "\026TopologyInstancesState\022$.littlehorse.To" +
+      "pologyInstanceStatePb\032).littlehorse.Topo" +
+      "logyInstanceStateReplyPb\"\000\022I\n\nLocalTasks" +
+      "\022\031.littlehorse.LocalTasksPb\032\036.littlehors" +
+      "e.LocalTasksReplyPb\"\000B\037\n\033io.littlehorse." +
+      "common.protoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

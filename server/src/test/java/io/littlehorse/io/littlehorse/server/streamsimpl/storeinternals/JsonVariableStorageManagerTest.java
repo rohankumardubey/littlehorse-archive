@@ -11,7 +11,7 @@ import io.littlehorse.sdk.common.proto.IndexTypePb;
 import io.littlehorse.sdk.common.proto.VariableTypePb;
 import io.littlehorse.server.streamsimpl.coreprocessors.CommandProcessorOutput;
 import io.littlehorse.server.streamsimpl.storeinternals.GetableStorageManager;
-import io.littlehorse.server.streamsimpl.storeinternals.LHStoreWrapper;
+import io.littlehorse.server.streamsimpl.storeinternals.RocksDBWrapper;
 import io.littlehorse.server.streamsimpl.storeinternals.index.Tag;
 import java.nio.file.Paths;
 import java.util.List;
@@ -43,7 +43,7 @@ public class JsonVariableStorageManagerTest {
     @Mock
     private LHConfig lhConfig;
 
-    private LHStoreWrapper localStoreWrapper;
+    private RocksDBWrapper localStoreWrapper;
 
     final MockProcessorContext<String, CommandProcessorOutput> mockProcessorContext = new MockProcessorContext<>();
     private GetableStorageManager geTableStorageManager;
@@ -83,7 +83,7 @@ public class JsonVariableStorageManagerTest {
     }
 
     private void initializeDependencies() {
-        localStoreWrapper = new LHStoreWrapper(store, lhConfig);
+        localStoreWrapper = new RocksDBWrapper(store, lhConfig);
         geTableStorageManager =
             new GetableStorageManager(
                 localStoreWrapper,

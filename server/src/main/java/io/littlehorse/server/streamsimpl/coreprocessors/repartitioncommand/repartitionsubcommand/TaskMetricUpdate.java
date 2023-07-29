@@ -10,7 +10,7 @@ import io.littlehorse.common.util.LHUtil;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.proto.MetricsWindowLengthPb;
 import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.RepartitionSubCommand;
-import io.littlehorse.server.streamsimpl.storeinternals.LHStoreWrapper;
+import io.littlehorse.server.streamsimpl.storeinternals.RocksDBWrapper;
 import java.util.Date;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 
@@ -136,7 +136,7 @@ public class TaskMetricUpdate
             .getStoreKey();
     }
 
-    public void process(LHStoreWrapper store, ProcessorContext<Void, Void> ctx) {
+    public void process(RocksDBWrapper store, ProcessorContext<Void, Void> ctx) {
         // Update TaskDef-Level Metrics
         TaskMetricUpdate previousUpdate = store.get(getStoreKey(), getClass());
         if (previousUpdate != null) {

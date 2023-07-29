@@ -60,7 +60,7 @@ import io.littlehorse.common.util.LHUtil;
 import io.littlehorse.sdk.common.proto.HostInfoPb;
 import io.littlehorse.server.listener.AdvertisedListenerConfig;
 import io.littlehorse.server.streamsimpl.lhinternalscan.InternalScan;
-import io.littlehorse.server.streamsimpl.storeinternals.LHROStore;
+import io.littlehorse.server.streamsimpl.storeinternals.ReadOnlyRocksDBWrapper;
 import io.littlehorse.server.streamsimpl.storeinternals.index.Tag;
 import io.littlehorse.server.streamsimpl.storeinternals.utils.LHIterKeyValue;
 import io.littlehorse.server.streamsimpl.storeinternals.utils.LHKeyValueIterator;
@@ -258,7 +258,7 @@ public class BackendInternalComms implements Closeable {
         );
 
         if (meta.activeHost().equals(thisHost)) {
-            LHROStore wrapper = new LHROStore(
+            ReadOnlyRocksDBWrapper wrapper = new ReadOnlyRocksDBWrapper(
                 getRawStore(null, false, storeName),
                 config
             );
@@ -435,7 +435,7 @@ public class BackendInternalComms implements Closeable {
         return coreStreams.store(params);
     }
 
-    private LHROStore getStore(
+    private ReadOnlyRocksDBWrapper getStore(
         Integer specificPartition,
         boolean enableStaleStores,
         String storeName
@@ -445,7 +445,7 @@ public class BackendInternalComms implements Closeable {
             enableStaleStores,
             storeName
         );
-        return new LHROStore(rawStore, config);
+        return new ReadOnlyRocksDBWrapper(rawStore, config);
     }
 
     /**
@@ -737,7 +737,7 @@ public class BackendInternalComms implements Closeable {
                     break;
                 case LAST_FROM_PREFIX:
                     result =
-                        new LHROStore(rawStore, config)
+                        new ReadOnlyRocksDBWrapper(rawStore, config)
                             .getLastBytesFromFullPrefix(
                                 req.getQuery().getLastFromPrefix()
                             );
@@ -851,7 +851,7 @@ public class BackendInternalComms implements Closeable {
         HostInfo activeHost = meta.activeHost();
 
         if (activeHost.equals(thisHost)) {
-            LHROStore store = getStore(
+            ReadOnlyRocksDBWrapper store = getStore(
                 meta.partition(),
                 false,
                 search.getStoreName()
@@ -924,7 +924,7 @@ public class BackendInternalComms implements Closeable {
         );
         int partition = meta.partition();
 
-        LHROStore store = getStore(partition, false, req.storeName);
+        ReadOnlyRocksDBWrapper store = getStore(partition, false, req.storeName);
         PartitionBookmarkPb partBookmark = reqBookmark.getInProgressPartitionsOrDefault(
             partition,
             null
@@ -1157,7 +1157,11 @@ public class BackendInternalComms implements Closeable {
 
         // iterate through all active and standby local partitions
         for (int partition : getLocalActiveCommandProcessorPartitions()) {
-            LHROStore partStore = getStore(partition, false, req.storeName);
+            ReadOnlyRocksDBWrapper partStore = getStore(
+                partition,
+                false,
+                req.storeName
+            );
             if (reqBookmark.getCompletedPartitionsList().contains(partition)) {
                 // This partition has already been accounted for
                 continue;
@@ -1219,7 +1223,7 @@ public class BackendInternalComms implements Closeable {
         int limit,
         GetableClassEnumPb objectType,
         int partition,
-        LHROStore store
+        ReadOnlyRocksDBWrapper store
     ) {
         PartitionBookmarkPb bookmarkOut = null;
         List<ByteString> idsOut = new ArrayList<>();
@@ -1321,7 +1325,7 @@ public class BackendInternalComms implements Closeable {
 
 class GlobalMetaStoresServerImpl implements LHGlobalMetaStores {
 
-    private LHROStore store;
+    private ReadOnlyRocksDBWrapper store;
 
     public GlobalMetaStoresServerImpl(KafkaStreams coreStreams, LHConfig config) {
         StoreQueryParameters<ReadOnlyKeyValueStore<String, Bytes>> params = StoreQueryParameters.fromNameAndType(
@@ -1329,7 +1333,7 @@ class GlobalMetaStoresServerImpl implements LHGlobalMetaStores {
             QueryableStoreTypes.keyValueStore()
         );
 
-        store = new LHROStore(coreStreams.store(params), config);
+        store = new ReadOnlyRocksDBWrapper(coreStreams.store(params), config);
     }
 
     public WfSpec getWfSpec(String name, Integer version) {

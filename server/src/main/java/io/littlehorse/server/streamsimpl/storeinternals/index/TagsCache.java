@@ -13,6 +13,12 @@ import lombok.Setter;
 @Setter
 public class TagsCache extends LHSerializable<TagsCachePb> {
 
+    public TagsCache() {}
+
+    public TagsCache(List<Tag> tags) {
+        this.setTags(tags.stream().map(tag -> new CachedTag(tag)).toList());
+    }
+
     public List<CachedTag> tags = new ArrayList<>();
 
     public Class<TagsCachePb> getProtoBaseClass() {
@@ -46,7 +52,4 @@ public class TagsCache extends LHSerializable<TagsCachePb> {
     public List<String> getTagIds() {
         return this.tags.stream().map(CachedTag::getId).toList();
     }
-    // public void setTagIds(List<String> tagIds) {
-    //     this.tagIds = tagIds;
-    // }
 }

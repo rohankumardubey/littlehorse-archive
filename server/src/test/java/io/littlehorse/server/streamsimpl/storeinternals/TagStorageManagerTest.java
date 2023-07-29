@@ -40,7 +40,7 @@ public class TagStorageManagerTest {
     @Mock
     private LHConfig lhConfig;
 
-    private LHStoreWrapper localStore = new LHStoreWrapper(store, lhConfig);
+    private RocksDBWrapper localStore = new RocksDBWrapper(store, lhConfig);
 
     final MockProcessorContext<String, CommandProcessorOutput> mockProcessorContext = new MockProcessorContext<>();
 

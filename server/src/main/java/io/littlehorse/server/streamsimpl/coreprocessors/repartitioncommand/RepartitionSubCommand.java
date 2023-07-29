@@ -1,11 +1,11 @@
 package io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand;
 
-import io.littlehorse.server.streamsimpl.storeinternals.LHStoreWrapper;
+import io.littlehorse.server.streamsimpl.storeinternals.RocksDBWrapper;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 
 public interface RepartitionSubCommand {
     public void process(
-        LHStoreWrapper repartitionedStore,
+        RocksDBWrapper repartitionedStore,
         ProcessorContext<Void, Void> ctx
     );
 

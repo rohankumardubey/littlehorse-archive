@@ -2,18 +2,15 @@ package io.littlehorse.server.streamsimpl.storeinternals;
 
 import com.google.protobuf.Message;
 import io.littlehorse.common.LHConfig;
-import io.littlehorse.common.model.Getable;
 import io.littlehorse.common.model.LHSerializable;
-import io.littlehorse.common.model.ObjectId;
 import io.littlehorse.common.model.Storeable;
 import io.littlehorse.sdk.common.exception.LHSerdeError;
 import io.littlehorse.server.streamsimpl.storeinternals.index.Tag;
 import io.littlehorse.server.streamsimpl.storeinternals.utils.LHKeyValueIterator;
 import io.littlehorse.server.streamsimpl.storeinternals.utils.LHKeyValueStream;
-import io.littlehorse.server.streamsimpl.storeinternals.utils.StoreUtils;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
+import org.apache.kafka.common.annotation.InterfaceStability.Evolving;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.state.KeyValueIterator;
@@ -36,34 +33,35 @@ import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
  */
 
 @Slf4j
-public class LHROStore {
+public class ReadOnlyRocksDBWrapper {
 
-    protected ReadOnlyKeyValueStore<String, Bytes> store;
+    protected ReadOnlyKeyValueStore<String, Bytes> rocksdb;
     protected LHConfig config;
 
-    public LHROStore(ReadOnlyKeyValueStore<String, Bytes> store, LHConfig config) {
-        this.store = store;
+    public ReadOnlyRocksDBWrapper(
+        ReadOnlyKeyValueStore<String, Bytes> rocksdb,
+        LHConfig config
+    ) {
+        this.rocksdb = rocksdb;
         this.config = config;
     }
 
-    public <U extends Message, T extends Getable<U>> T get(ObjectId<?, U, T> id) {
-        throw new NotImplementedException();
-    }
-
     public <U extends Message, T extends Storeable<U>> T get(
-        String objectId,
+        String storeableKey,
         Class<T> cls
     ) {
-        Bytes raw = store.get(StoreUtils.getFullStoreKey(objectId, cls));
-        if (raw == null) {
-            return null;
-        }
+        String fullKey = Storeable.getFullStoreKey(cls, storeableKey);
+        log.trace("Getting {} from rocksdb", fullKey);
+        Bytes raw = rocksdb.get(fullKey);
+
+        if (raw == null) return null;
+
         try {
-            return LHSerializable.fromBytes(raw.get(), cls, config);
+            return LHSerializable.fromBytes(raw.get(), cls);
         } catch (LHSerdeError exn) {
-            log.error(exn.getMessage(), exn);
-            throw new RuntimeException(
-                "Not possible to have this happen, indicates corrupted store."
+            throw new IllegalStateException(
+                "LHSerdeError indicates corrupted store.",
+                exn
             );
         }
     }
@@ -75,32 +73,22 @@ public class LHROStore {
         String prefix,
         Class<T> cls
     ) {
-        String compositePrefix = StoreUtils.getFullStoreKey(prefix, cls);
+        String compositePrefix = Storeable.getFullStoreKey(cls, prefix);
         return new LHKeyValueIterator<>(
-            store.prefixScan(compositePrefix, Serdes.String().serializer()),
+            rocksdb.prefixScan(compositePrefix, Serdes.String().serializer()),
             cls,
             config
         );
     }
 
-    public <T extends Storeable<?>> LHKeyValueIterator<T> prefixTagScan(
-        String prefix,
-        Class<T> cls
-    ) {
-        return new LHKeyValueIterator<>(
-            store.prefixScan(prefix, Serdes.String().serializer()),
-            cls,
-            config
-        );
-    }
-
+    @Deprecated
     public <T extends Storeable<?>> Stream<T> prefixTagScanStream(
         String prefix,
         Class<T> cls
     ) {
         LHKeyValueStream<T> keyValueStream = new LHKeyValueStream<>(
-            store.prefixScan(
-                StoreUtils.getSubstorePrefix(Tag.class),
+            rocksdb.prefixScan(
+                Storeable.getSubstorePrefix(Tag.class),
                 Serdes.String().serializer()
             ),
             cls,
@@ -109,7 +97,14 @@ public class LHROStore {
         return keyValueStream.stream().map(stringTKeyValue -> stringTKeyValue.value);
     }
 
-    public <U extends Message, T extends Getable<U>> T getLastFromPrefix(
+    /*
+     * NOTE: the public API of this method should change such that the _user_ must
+     * choose whether or not to pass in a "/", we shouldn't add the "/" ourselves.
+     *
+     * That _MUST_ be done before this PR gets merged.
+     */
+    @Evolving
+    public <U extends Message, T extends Storeable<U>> T getLastFromPrefix(
         String prefix,
         Class<T> cls
     ) {
@@ -128,10 +123,11 @@ public class LHROStore {
         }
     }
 
+    @Deprecated // this is swiss-cheese abstraction
     public Bytes getLastBytesFromFullPrefix(String fullPrefix) {
         KeyValueIterator<String, Bytes> rawIter = null;
         try {
-            rawIter = store.reverseRange(fullPrefix, fullPrefix + "~");
+            rawIter = rocksdb.reverseRange(fullPrefix, fullPrefix + "~");
             if (rawIter.hasNext()) {
                 return rawIter.next().value;
             } else {
@@ -146,7 +142,7 @@ public class LHROStore {
         String prefix,
         Class<T> cls
     ) {
-        String start = StoreUtils.getFullStoreKey(prefix, cls);
+        String start = Storeable.getFullStoreKey(cls, prefix);
         // The Streams ReadOnlyKeyValueStore doesn't have a reverse prefix scan.
         // However, they do have a reverse range scan. So we take the prefix and
         // then we use the fact that we know the next character after the prefix is
@@ -154,7 +150,11 @@ public class LHROStore {
         // greater than Z. We'll go with the '~', which is the greatest Ascii
         // character.
         String end = start + '~';
-        return new LHKeyValueIterator<>(store.reverseRange(start, end), cls, config);
+        return new LHKeyValueIterator<>(
+            rocksdb.reverseRange(start, end),
+            cls,
+            config
+        );
     }
 
     /**
@@ -172,9 +172,9 @@ public class LHROStore {
         Class<T> cls
     ) {
         return new LHKeyValueIterator<>(
-            store.range(
-                StoreUtils.getFullStoreKey(start, cls),
-                StoreUtils.getFullStoreKey(end, cls)
+            rocksdb.range(
+                Storeable.getFullStoreKey(cls, start),
+                Storeable.getFullStoreKey(cls, end)
             ),
             cls,
             config
