@@ -269,7 +269,6 @@ public class Variable extends Getable<VariablePb> {
         }
     }
 
-    @Override
     public TagStorageTypePb tagStorageTypePb() {
         return getWfSpec()
             .getThreadSpecs()

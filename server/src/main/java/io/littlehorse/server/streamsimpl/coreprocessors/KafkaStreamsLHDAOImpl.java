@@ -232,6 +232,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
                 return store.get(new WfSpecId(name, version));
             }
             return store.getLastFromPrefix(name, WfSpec.class);
+            // StoredGetable/WfSpec/my-wf-v1
         };
         WfSpec wfSpec = wfSpecCache.getOrCache(name, version, findWfSpec);
         if (wfSpec != null) wfSpec.setDao(this);

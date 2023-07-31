@@ -46,7 +46,7 @@ public class DeleteExternalEvent extends SubCommand<DeleteExternalEventPb> {
         );
         ExternalEvent externalEvent = dao.getExternalEvent(eventId.getStoreKey());
         if (!externalEvent.claimed) {
-            return dao.deleteExternalEvent(eventId.getStoreKey());
+            return dao.deleteExternalEvent(eventId);
         } else {
             DeleteObjectReply response = new DeleteObjectReply();
             response.code = LHResponseCodePb.VALIDATION_ERROR;

@@ -6,6 +6,7 @@ import io.littlehorse.common.LHConstants;
 import io.littlehorse.common.LHDAO;
 import io.littlehorse.common.model.command.SubCommand;
 import io.littlehorse.common.model.command.subcommandresponse.DeleteObjectReply;
+import io.littlehorse.common.model.objectId.WfSpecId;
 import io.littlehorse.sdk.common.proto.DeleteWfSpecPb;
 
 public class DeleteWfSpec extends SubCommand<DeleteWfSpecPb> {
@@ -36,7 +37,7 @@ public class DeleteWfSpec extends SubCommand<DeleteWfSpecPb> {
     }
 
     public DeleteObjectReply process(LHDAO dao, LHConfig config) {
-        return dao.deleteWfSpec(name, version);
+        return dao.deleteWfSpec(new WfSpecId(name, version));
     }
 
     public boolean hasResponse() {

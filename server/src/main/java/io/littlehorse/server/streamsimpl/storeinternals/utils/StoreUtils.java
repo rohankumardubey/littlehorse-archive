@@ -11,8 +11,10 @@ import io.littlehorse.server.streamsimpl.coreprocessors.repartitioncommand.repar
 import io.littlehorse.server.streamsimpl.storeinternals.index.Tag;
 import io.littlehorse.server.streamsimpl.storeinternals.index.TagsCache;
 
+@Deprecated
 public class StoreUtils {
 
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static String getFullStoreKey(Storeable<?> thing) {
         return (
@@ -21,6 +23,7 @@ public class StoreUtils {
         );
     }
 
+    @Deprecated
     public static <T extends Message, U extends Getable<T>> String getFullStoreKey(
         ObjectId<?, T, U> objectId,
         Class<? extends Storeable<T>> cls
@@ -28,6 +31,7 @@ public class StoreUtils {
         return getSubstorePrefix(cls) + objectId.getStoreKey();
     }
 
+    @Deprecated
     public static String getFullStoreKey(
         String objectId,
         Class<? extends Storeable<?>> cls
@@ -35,6 +39,7 @@ public class StoreUtils {
         return getSubstorePrefix(cls) + objectId;
     }
 
+    @Deprecated
     public static String getFullPrefixByName(
         String name,
         Class<? extends Storeable<?>> cls
@@ -42,12 +47,13 @@ public class StoreUtils {
         return getSubstorePrefix(cls) + name + "/";
     }
 
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static String getSubstorePrefix(Class<? extends Storeable<?>> cls) {
         if (Getable.class.isAssignableFrom(cls)) {
             return (
                 "" +
-                Getable.getTypeEnum((Class<? extends Getable<?>>) cls).getNumber() +
+                Getable.getTypeEnum((Class<Getable<>>) cls).getNumber() +
                 "/"
             );
         }

@@ -6,6 +6,7 @@ import io.littlehorse.common.LHConstants;
 import io.littlehorse.common.LHDAO;
 import io.littlehorse.common.model.command.SubCommand;
 import io.littlehorse.common.model.command.subcommandresponse.DeleteObjectReply;
+import io.littlehorse.common.model.objectId.ExternalEventDefId;
 import io.littlehorse.sdk.common.proto.DeleteExternalEventDefPb;
 
 public class DeleteExternalEventDef extends SubCommand<DeleteExternalEventDefPb> {
@@ -33,7 +34,7 @@ public class DeleteExternalEventDef extends SubCommand<DeleteExternalEventDefPb>
     }
 
     public DeleteObjectReply process(LHDAO dao, LHConfig config) {
-        return dao.deleteExternalEventDef(name);
+        return dao.deleteExternalEventDef(new ExternalEventDefId(name));
     }
 
     public boolean hasResponse() {

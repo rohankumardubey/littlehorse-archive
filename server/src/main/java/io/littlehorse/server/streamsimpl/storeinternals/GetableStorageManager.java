@@ -301,6 +301,10 @@ public class GetableStorageManager {
                     entity.getTagsPresentBeforeUpdate(),
                     (Class<? extends Getable<?>>) getable.getClass()
                 );
+
+                if (isGlobalMetadata(getable)) {
+                    // forward to changelog topic
+                }
             }
         }
     }

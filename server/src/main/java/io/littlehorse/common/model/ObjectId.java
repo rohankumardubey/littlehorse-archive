@@ -2,6 +2,8 @@ package io.littlehorse.common.model;
 
 import com.google.protobuf.Message;
 import io.littlehorse.common.proto.GetableClassEnumPb;
+import io.littlehorse.common.proto.StoreableClassEnumPb;
+import io.littlehorse.server.streamsimpl.storeinternals.utils.StoredGetable;
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class ObjectId<
@@ -11,6 +13,14 @@ public abstract class ObjectId<
     implements Comparable<ObjectId<?, ?, ?>> {
 
     public abstract String getStoreKey();
+
+    // This will be cleaned up
+    public String getFullRawRocksdbKey() {
+        return Storeable.getFullStoreKey(
+            StoreableClassEnumPb.STORED_GETABLE,
+            StoredGetable.getStoreKey(this)
+        );
+    }
 
     public abstract void initFrom(String storeKey);
 

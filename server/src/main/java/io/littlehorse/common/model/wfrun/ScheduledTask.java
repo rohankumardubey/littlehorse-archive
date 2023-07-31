@@ -7,6 +7,7 @@ import io.littlehorse.common.model.objectId.TaskDefId;
 import io.littlehorse.common.model.objectId.TaskRunId;
 import io.littlehorse.common.model.wfrun.taskrun.TaskRunSource;
 import io.littlehorse.common.model.wfrun.taskrun.UserTaskTriggerReference;
+import io.littlehorse.common.proto.StoreableClassEnumPb;
 import io.littlehorse.common.util.LHUtil;
 import io.littlehorse.sdk.common.proto.ScheduledTaskPb;
 import io.littlehorse.sdk.common.proto.VarNameAndValPb;
@@ -31,6 +32,11 @@ public class ScheduledTask extends Storeable<ScheduledTaskPb> {
 
     public ScheduledTask() {
         variables = new ArrayList<>();
+    }
+
+    @Override
+    public StoreableClassEnumPb getType() {
+        return StoreableClassEnumPb.SCHEDULED_TASK;
     }
 
     /*

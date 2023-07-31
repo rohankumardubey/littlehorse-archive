@@ -5,6 +5,7 @@ import io.littlehorse.common.LHConfig;
 import io.littlehorse.common.LHDAO;
 import io.littlehorse.common.model.command.SubCommand;
 import io.littlehorse.common.model.command.subcommandresponse.DeleteObjectReply;
+import io.littlehorse.common.model.objectId.WfRunId;
 import io.littlehorse.sdk.common.proto.DeleteWfRunPb;
 
 public class DeleteWfRun extends SubCommand<DeleteWfRunPb> {
@@ -30,7 +31,7 @@ public class DeleteWfRun extends SubCommand<DeleteWfRunPb> {
     }
 
     public DeleteObjectReply process(LHDAO dao, LHConfig config) {
-        return dao.deleteWfRun(wfRunId);
+        return dao.deleteWfRun(new WfRunId(wfRunId));
     }
 
     public boolean hasResponse() {

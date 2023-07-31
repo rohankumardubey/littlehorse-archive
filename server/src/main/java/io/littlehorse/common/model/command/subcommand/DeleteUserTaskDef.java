@@ -6,6 +6,7 @@ import io.littlehorse.common.LHConstants;
 import io.littlehorse.common.LHDAO;
 import io.littlehorse.common.model.command.SubCommand;
 import io.littlehorse.common.model.command.subcommandresponse.DeleteObjectReply;
+import io.littlehorse.common.model.objectId.UserTaskDefId;
 import io.littlehorse.sdk.common.proto.DeleteUserTaskDefPb;
 
 public class DeleteUserTaskDef extends SubCommand<DeleteUserTaskDefPb> {
@@ -36,7 +37,7 @@ public class DeleteUserTaskDef extends SubCommand<DeleteUserTaskDefPb> {
     }
 
     public DeleteObjectReply process(LHDAO dao, LHConfig config) {
-        return dao.deleteUserTaskDef(name, version);
+        return dao.deleteUserTaskDef(new UserTaskDefId(name, version));
     }
 
     public boolean hasResponse() {
