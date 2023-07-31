@@ -183,7 +183,7 @@ public class KafkaStreamsLHDAOImpl implements LHDAO {
     public void resetAndSetCommand(Command command) {
         this.command = command;
         this.storageManager =
-            new GetableStorageManager(rawLocalStore, ctx, config, command, this);
+            new GetableStorageManager(localStore, ctx, config, command, this);
     }
 
     @Override

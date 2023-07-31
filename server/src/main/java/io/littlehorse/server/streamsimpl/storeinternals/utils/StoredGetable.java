@@ -3,6 +3,7 @@ package io.littlehorse.server.streamsimpl.storeinternals.utils;
 import com.google.protobuf.Message;
 import io.littlehorse.common.model.Getable;
 import io.littlehorse.common.model.LHSerializable;
+import io.littlehorse.common.model.ObjectId;
 import io.littlehorse.common.model.Storeable;
 import io.littlehorse.common.proto.GetableClassEnumPb;
 import io.littlehorse.common.proto.StoreableClassEnumPb;
@@ -24,6 +25,14 @@ public class StoredGetable<U extends Message, T extends Getable<U>>
     private GetableClassEnumPb objectType;
 
     public StoredGetable() {}
+
+    @SuppressWarnings("unchecked")
+    public StoredGetable(T getable) {
+        this.indexCache = new TagsCache(getable.getIndexEntries());
+        this.storedObject = getable;
+        this.objectType =
+            Getable.getTypeEnum((Class<? extends Getable<?>>) getable.getClass());
+    }
 
     @Override
     public Class<StoredGetablePb> getProtoBaseClass() {
@@ -59,9 +68,11 @@ public class StoredGetable<U extends Message, T extends Getable<U>>
 
     @Override
     public String getStoreKey() {
-        return String.valueOf(
-            objectType.getNumber() + "/" + storedObject.getObjectId().getStoreKey()
-        );
+        return StoredGetable.getStoreKey(storedObject.getObjectId());
+    }
+
+    public static String getStoreKey(ObjectId<?, ?, ?> id) {
+        return id.getType().getNumber() + "/" + id.getStoreKey();
     }
 
     @SuppressWarnings("unchecked")

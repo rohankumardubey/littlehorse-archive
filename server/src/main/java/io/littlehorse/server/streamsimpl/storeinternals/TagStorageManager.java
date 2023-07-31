@@ -21,16 +21,14 @@ public class TagStorageManager {
 
     private RocksDBWrapper localStore;
     private ProcessorContext<String, CommandProcessorOutput> context;
-    private LHConfig lhConfig;
+    private LHConfig config;
 
     public void store(
         Collection<Tag> tags,
-        String getableId,
+        TagsCache preExistingTags,
         Class<? extends Getable<?>> getableCls
     ) {
-        TagsCache tagsCache = localStore.getTagsCache(getableId, getableCls);
-        tagsCache = tagsCache != null ? tagsCache : new TagsCache();
-        List<String> existingTagIds = tagsCache.getTagIds();
+        List<String> existingTagIds = preExistingTags.getTagIds();
         List<CachedTag> cachedTags = tags
             .stream()
             .map(tag -> {
@@ -41,9 +39,8 @@ public class TagStorageManager {
             })
             .toList();
         this.storeLocalOrRemoteTag(tags, existingTagIds);
-        this.removeOldTags(tags, tagsCache.getTags());
-        tagsCache.setTags(cachedTags);
-        localStore.putTagsCache(getableId, getableCls, tagsCache);
+        this.removeOldTags(tags, preExistingTags.getTags());
+        preExistingTags.setTags(cachedTags);
     }
 
     private void removeOldTags(Collection<Tag> newTags, List<CachedTag> cachedTags) {
@@ -100,7 +97,7 @@ public class TagStorageManager {
         );
         CommandProcessorOutput cpo = new CommandProcessorOutput();
         cpo.partitionKey = tagAttributeString;
-        cpo.topic = this.lhConfig.getRepartitionTopicName();
+        cpo.topic = this.config.getRepartitionTopicName();
         cpo.payload = new RepartitionCommand(command, new Date(), tagStoreKey);
         Record<String, CommandProcessorOutput> out = new Record<>(
             tagAttributeString,
@@ -115,7 +112,7 @@ public class TagStorageManager {
         String partitionKey = tag.getPartitionKey();
         CommandProcessorOutput cpo = new CommandProcessorOutput();
         cpo.setPartitionKey(partitionKey);
-        cpo.setTopic(this.lhConfig.getRepartitionTopicName());
+        cpo.setTopic(this.config.getRepartitionTopicName());
         cpo.setPayload(new RepartitionCommand(command, new Date(), partitionKey));
         Record<String, CommandProcessorOutput> out = new Record<>(
             partitionKey,
@@ -125,3 +122,17 @@ public class TagStorageManager {
         this.context.forward(out);
     }
 }
+/*
+
+pre-existing: ["foo:bar", "baz:asdf"] // No way to get this without checking early
+
+new tags: ["foo:bar", "baz:fdsa"] // calculated by getable.getIndexEntries()
+
+actions:
+1. remove tag "baz:asdf"
+2. create tag "baz:fdsa"
+
+Local index: just put/delete on local store
+Remote index: need to send a command to repartition topic
+
+ */

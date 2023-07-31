@@ -23,6 +23,11 @@ public abstract class ObjectId<
         return getStoreKey();
     }
 
+    @SuppressWarnings("unchecked")
+    public Class<V> getGetableClass() {
+        return (Class<V>) Getable.getCls(getType());
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other == null) return false;
